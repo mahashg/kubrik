@@ -14,3 +14,9 @@ Then add directory(ies) to be backedup
 
 To restore a directory
 ```python kub.py restore -directory /Users/Mahesh.Gupta/Downloads```
+
+To list all snapshot
+```python kub.py list```
+
+to list snapshot of a specific directory
+```python kub.py list -directory /Users/Mahesh.Gupta/Downloads```
