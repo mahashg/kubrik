@@ -14,14 +14,15 @@ from datetime import datetime
 
 log = logging.getLogger('%s.py' % '/'.join(__name__.split('.')))
 
-config_file = "config.txt"
+config_file = "config.json"
+creds_file = "credentials.json"
 
-def write_local_conf(config):
-    f = open(config_file, "w")
+def write_local_conf(config, file_name):
+    f = open(file_name, "w")
     f.write(json.dumps(config))
     f.close()
 
-def read_local_conf():
+def read_local_conf(file_name):
     f = open(config_file, "r")
     out = f.read()
     f.close()
@@ -32,13 +33,23 @@ def process_register(args):
     Server internally stores email_id and 
     uses it future communication with server
     """
-    folder_id = server.register(args.email)
+    print("processing for email ", args.email)
+    resp = server.register(args.email)
+    if len(resp) == 0:
+        return
+    print("remote repo allocated by server")
+    folder_id = resp.get("google_drive_id")
+    credential = resp.get("credentials")
     config = {
         "email": args.email,
         "host": socket.gethostname(),
         "folder": folder_id
     }
-    write_local_conf(config )
+    print("credentials storing locally")
+    write_local_conf(config, config_file)
+    write_local_conf(credential, creds_file)
+    print("registering with local agent")
+    kopia.register(folder_id)
 
 
 def process_snapshot(args):
@@ -47,7 +58,7 @@ def process_snapshot(args):
     which fails if directory is already in snapshot
     which succeeds and returns google_drive_id
     """
-    folder_id = read_local_conf().get("folder")
+    folder_id = read_local_conf(config_file).get("folder")
     kopia.snapshot_create(args.directory)
     print("process_snapshot called with arguments ", args)
 
