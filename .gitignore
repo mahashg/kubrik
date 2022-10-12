@@ -1,3 +1,4 @@
 kubrik_client/config.txt
 kubrik_client/__pycache__/
 kubrik_server/.idea/
+kubrik_server/kubrik.db

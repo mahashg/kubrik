@@ -6,26 +6,36 @@ import sqlite3
 
 app = Flask(__name__)
 
-avail_google_drive_ids = [
-    "4a35a5c0-49ff-11ed-b878-0242ac120002",
-    "4a35ab74-49ff-11ed-b878-0242ac120002",
-    "4a35ad72-49ff-11ed-b878-0242ac120002"]
-used_google_drive_ids = []
 
 def generate_google_drive_id():
-    if not avail_google_drive_ids:
+    """
+    get google_drive_id for a new user
+    :return:
+    """
+    wdict = {
+        "available": 1
+    }
+    result = get_from_db("google_drive_ids", wdict, ["id"])
+    if result:
+        google_drive_id = result[0][0].strip()
+        wdict = {
+            "id" : google_drive_id
+        }
+        values_dict = {
+            "available": 0
+        }
+        update_db("google_drive_ids", wdict, values_dict)
+        return google_drive_id
+    else:
         return ""
-    google_drive_id = avail_google_drive_ids[-1]
-    avail_google_drive_ids.pop()
-    used_google_drive_ids.append(google_drive_id)
-    return google_drive_id
 
-def add_google_drive_id(id):
-    used_google_drive_ids.pop()
-    avail_google_drive_ids.append(id)
 
 
 def get_google_drive_id(gmailid):
+    """
+    get google_drive_id for an existing user
+    :param gmailid:
+    """
     wdict = {
         "gmailid": gmailid
     }
@@ -188,13 +198,23 @@ def register():
     content = request.get_json()
     google_drive_id = ""
     try:
-        google_drive_id = generate_google_drive_id()
-        if google_drive_id == "":
-            raise Exception("No google drive ids available")
-        insert_into_db("uuids", [content["gmailid"].strip(),google_drive_id])
         f = open('credentials.json')
         credentials = json.load(f)
         f.close()
+        gmailid = content["gmailid"].strip()
+        wdict = {
+            "gmailid": gmailid
+        }
+        result = get_from_db("uuids", wdict, ["google_drive_id"])
+        if result:
+            print("user already registered")
+            google_drive_id = result[0][0]
+            return jsonify({"status": "SUCCESS", "credentials": credentials, "google_drive_id": google_drive_id})
+        google_drive_id = generate_google_drive_id()
+        if google_drive_id == "":
+            raise Exception("No google drive ids available")
+        insert_into_db("uuids", [gmailid, google_drive_id])
+
         return jsonify({"status": "SUCCESS", "credentials":credentials, "google_drive_id": google_drive_id})
     except Exception as e:
         if google_drive_id != "":
