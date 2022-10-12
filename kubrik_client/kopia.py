@@ -23,9 +23,9 @@ def connect(gdrive_id):
     """connect with gdrive id"""
     return execute_command([BASE_WITH_CREDENTIAL, "connect", "gdrive", " --folder-id="+gdrive_id])
 
-def snapshot_create(dir):
+def snapshot_create(local_dir):
     """start taking snapshot of a directory"""
-    return execute_command([BASE_WITH_CREDENTIAL, "snapshot", "create", dir])
+    return execute_command([BASE_COMMAND, "snapshot", "create", local_dir])
 
 def list_repo(dir):
     """list all the repo which are snapshotted"""

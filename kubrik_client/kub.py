@@ -1,17 +1,42 @@
 #!/usr/bin/env python3
 
+from distutils.command.config import config
 from rubrik.sdk_internal.cli_tools import cli
-
+import os
+import socket
+import json
+import kopia
+import server
+import logging
+import sys
 
 log = logging.getLogger('%s.py' % '/'.join(__name__.split('.')))
 
+config_file = "config.txt"
+
+def write_local_conf(config):
+    f = open(config_file, "w")
+    f.write(json.dumps(config))
+    f.close()
+
+def read_local_conf():
+    f = open(config_file, "r")
+    out = f.read()
+    f.close()
+    return json.loads(out)
 
 def process_register(args):
     """    
     Server internally stores email_id and 
     uses it future communication with server
     """
-    print("process_register called with argument ", args)
+    folder_id = server.register(args.email)
+    config = {
+        "email": args.email,
+        "host": socket.gethostname(),
+        "folder": folder_id
+    }
+    write_local_conf(config )
 
 
 def process_snapshot(args):
@@ -20,6 +45,8 @@ def process_snapshot(args):
     which fails if directory is already in snapshot
     which succeeds and returns google_drive_id
     """
+    folder_id = read_local_conf().get("folder")
+    kopia.snapshot_create(args.directory)
     print("process_snapshot called with arguments ", args)
 
 
@@ -52,6 +79,17 @@ def _add_email_argument(parser):
         required=True,
     )
 
+def _add_directory_argument(parser):
+    cli.add_argument(
+        parser,
+        '-directory',
+        '--directory',
+        help='directory to be backed up',
+        type=str,
+        required=True,
+    )
+
+
 def parse_process_snapshot(subparser):
     parser = cli.add_parser(
         subparser,
@@ -59,6 +97,7 @@ def parse_process_snapshot(subparser):
         help='Begin taking snapshot of file',
         formatter_class=cli.Formatter,
     )
+    _add_directory_argument(parser)
     cli.set_defaults(parser, func=process_snapshot)
 
 
@@ -81,6 +120,7 @@ def _parse_args():
     )
     parse_process_register(subparser) 
     parse_process_snapshot(subparser)
+    parse_restore_command(subparser)
     return cli.parse_args(parser)
 
 
