@@ -27,17 +27,22 @@ def snapshot_create(local_dir):
     """start taking snapshot of a directory"""
     return execute_command([BASE_COMMAND, "snapshot", "create", local_dir])
 
-def list_repo(dir):
+def list_repo():
     """list all the repo which are snapshotted"""
     return execute_command([BASE_COMMAND, "snapshot", "list"])
 
 def restore(hash_id):
     """restore the content with id right here"""
-    return execute_command([BASE_COMMAND, "restore", id])
+    return execute_command([BASE_COMMAND, "restore", hash_id])
 
 def do_ls(hash_id):
     """ See content of directory"""
     return execute_command([BASE_COMMAND, "ls", "-l", id])
 
+
+def move(src, dest):
+    return execute_command(["mv", src, dest])
+
+
 def repo_status():
-    return execute_command[BASE_COMMAND, "repository", "status"]
+    return execute_command([BASE_COMMAND, "repository", "status"])

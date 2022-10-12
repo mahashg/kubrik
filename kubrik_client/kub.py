@@ -50,12 +50,33 @@ def process_snapshot(args):
     print("process_snapshot called with arguments ", args)
 
 
+def find_directory_last_known_snapshot(directory):
+    lst = kopia.list_repo()
+    found = False
+    print("directory = ", directory)
+    for line in lst.split("\n"):
+        line = line.strip()
+        print("line is ", line)
+        if found:
+            return line.split(" ")[3]
+        if line.endswith(directory):
+            found = True
+    return None
+
 def process_restore(args):
     """
     Server uses email_id, path and returns google_drive_id
     client and use it to navigate and figure out interaction
-    """
-    print("process_restore called with arguments ", args)
+    """    
+    snapshot_id = find_directory_last_known_snapshot(args.directory)
+    if not snapshot_id:
+        print("not found")
+        return
+    
+    kopia.restore(snapshot_id)
+    dirname = os.path.basename(args.directory) + "_" + snapshot_id
+    kopia.move(snapshot_id, dirname)
+    print("Restored to ", dirname)
 
 
 def parse_process_register(subparser):
@@ -108,6 +129,7 @@ def parse_restore_command(subparser):
         help='Begin restoring snapshot of a server',
         formatter_class=cli.Formatter,
     )
+    _add_directory_argument(parser)
     cli.set_defaults(parser, func=process_restore)
 
 
