@@ -6,7 +6,6 @@ import sqlite3
 
 app = Flask(__name__)
 
-
 def generate_google_drive_id():
     """
     get google_drive_id for a new user
@@ -193,6 +192,10 @@ def hello():
     return '<h1>Hello, World!</h1>'
 
 
+"""
+Reads email id in "gmailid" parameter,
+returns { "status": "google_drive_id"}
+"""
 @app.route('/register', methods = ['POST'])
 def register():
     content = request.get_json()

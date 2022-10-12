@@ -1,15 +1,14 @@
-#Setup
+# Setup and Running
 
-1. pip3 install -r requirements.txt
-2. sudo apt-get install sqlite3 libsqlite3-dev
+## Setup
 
 
-# Execution
+* pip3 install -r requirements.txt
+* sudo apt-get install sqlite3 libsqlite3-dev
+* run python db_init.py file
 
-First initialize sqlite db
-```python3 db_init.py```
 
-Start the flask app
-```python3 app.py```
-
+## Running
+* run python app.py
+* hit the `/` endpoint to see if you are getting "hello_world" in output
 

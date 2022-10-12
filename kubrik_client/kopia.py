@@ -7,21 +7,24 @@ import logging
 log = logging.getLogger('%s.py' % '/'.join(__name__.split('.')))
 
 BASE_COMMAND="./kopia"
-BASE_WITH_CREDENTIAL=BASE_COMMAND + " --credentials-file api.json"
 
 
 def execute_command(args):
     command = " ".join(args)
     out = os.popen(command)
-    return out.read()
+    resp = out.read()    
+    return resp
 
 def validate_provider():
     """ command needs fixing"""
     return execute_command([BASE_COMMAND, "repository", "validate-provider"])
 
+def register(gdrive_id):
+    return execute_command([BASE_COMMAND, "repository", "create", "gdrive", "--folder-id="+gdrive_id, "--credentials-file",  "credentials.json"])
+
 def connect(gdrive_id):
     """connect with gdrive id"""
-    return execute_command([BASE_WITH_CREDENTIAL, "connect", "gdrive", " --folder-id="+gdrive_id])
+    return execute_command([BASE_COMMAND, "repository", "connect", "gdrive", " --folder-id="+gdrive_id, "--credentials-file",  "credentials.json"])
 
 def snapshot_create(local_dir):
     """start taking snapshot of a directory"""
