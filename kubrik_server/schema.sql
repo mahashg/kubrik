@@ -26,13 +26,8 @@ CREATE TABLE repository (
 );
 
 
-INSERT INTO google_drive_ids VALUES ("4a35a5c0-49ff-11ed-b878-0242ac120002", 1);
-INSERT INTO google_drive_ids VALUES ("4a35ab74-49ff-11ed-b878-0242ac120002", 1);
-INSERT INTO google_drive_ids VALUES ("4a35ad72-49ff-11ed-b878-0242ac120002", 1);
-INSERT INTO google_drive_ids VALUES ("4a35a5c1-59ff-11ed-b878-0242ac120002", 1);
-INSERT INTO google_drive_ids VALUES ("4a35ab75-49ff-21ed-b878-0242ac120002", 1);
-INSERT INTO google_drive_ids VALUES ("4a35ad73-49ff-11ed-c878-0242ac120002", 1);
-INSERT INTO google_drive_ids VALUES ("4a35a5c3-49ff-11ed-b878-1242ac120002", 1);
-INSERT INTO google_drive_ids VALUES ("4a35a5c0-49ff-11ed-b878-0242ac120003", 1);
-INSERT INTO google_drive_ids VALUES ("4a35ab76-49ff-11ed-b878-0242ac120002", 1);
-INSERT INTO google_drive_ids VALUES ("4a35a5c1-49ff-11ed-b879-1242ac120002", 1);
+INSERT INTO google_drive_ids VALUES ("1WPP_RpY3v9ZPHM5xGHkyf3xyTAZXBEaH", 1);
+INSERT INTO google_drive_ids VALUES ("1ssrdz2EgDRfJ-RHR2S7Q3fB2cd9foX1l", 1);
+INSERT INTO google_drive_ids VALUES ("1g9KaIFglDvACO2FIZsUkCCFYWo40wOL2", 1);
+INSERT INTO google_drive_ids VALUES ("1tMTzXmaBvniVKeHSd4-dFxGnnmMuoQDp", 1);
+INSERT INTO google_drive_ids VALUES ("16vwQ-odNEDMe3n6y34eQXoPbInLSXLSf", 1);
