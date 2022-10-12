@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from distutils.command.config import config
+from re import sub
 from rubrik.sdk_internal.cli_tools import cli
 import os
 import socket
@@ -9,6 +10,7 @@ import kopia
 import server
 import logging
 import sys
+from datetime import datetime
 
 log = logging.getLogger('%s.py' % '/'.join(__name__.split('.')))
 
@@ -49,18 +51,39 @@ def process_snapshot(args):
     kopia.snapshot_create(args.directory)
     print("process_snapshot called with arguments ", args)
 
+def _check_valid_date(date_str):
+    try:
+        datetime.strptime(date_str.strip(), '%Y-%m-%d').date()
+        return True
+    except Exception as e:
+        return False
+
+def list_repo():
+    lst = kopia.list_repo()
+    lines = lst.split("\n")
+    
+    key, value = '', []
+    _map = {}
+    for line in lines:
+        line = line.strip()
+        if line == '':
+            _map[key] = value
+            key, value = '', []
+        if not _check_valid_date(line.split(" ")[0]):
+            key = line
+        else:
+            ts = " ".join(line.split(" ")[0:3])
+            hash = line.split(" ")[3]   
+            value.append({"timestamp": ts, "hash": hash})
+    
+    return _map
 
 def find_directory_last_known_snapshot(directory):
-    lst = kopia.list_repo()
-    found = False
-    print("directory = ", directory)
-    for line in lst.split("\n"):
-        line = line.strip()
-        print("line is ", line)
-        if found:
-            return line.split(" ")[3]
-        if line.endswith(directory):
-            found = True
+    _map = list_repo()
+    
+    for key in _map:        
+        if key.endswith(directory):
+            return _map[key][0]
     return None
 
 def process_restore(args):
@@ -78,6 +101,20 @@ def process_restore(args):
     kopia.move(snapshot_id, dirname)
     print("Restored to ", dirname)
 
+
+def process_list_repo(args):
+    _map = list_repo()
+    if args.directory:
+        for key in _map:
+            if key.endswith(args.directory):
+                print(_map[key])
+    else:
+        for key in _map:
+            print(key)
+            print(_map[key])
+            print()
+        
+    
 
 def parse_process_register(subparser):
     parser = cli.add_parser(
@@ -100,14 +137,14 @@ def _add_email_argument(parser):
         required=True,
     )
 
-def _add_directory_argument(parser):
+def _add_directory_argument(parser, isRequired):
     cli.add_argument(
         parser,
         '-directory',
         '--directory',
         help='directory to be backed up',
         type=str,
-        required=True,
+        required=isRequired,
     )
 
 
@@ -118,7 +155,7 @@ def parse_process_snapshot(subparser):
         help='Begin taking snapshot of file',
         formatter_class=cli.Formatter,
     )
-    _add_directory_argument(parser)
+    _add_directory_argument(parser, True)
     cli.set_defaults(parser, func=process_snapshot)
 
 
@@ -129,9 +166,19 @@ def parse_restore_command(subparser):
         help='Begin restoring snapshot of a server',
         formatter_class=cli.Formatter,
     )
-    _add_directory_argument(parser)
+    _add_directory_argument(parser, True)
     cli.set_defaults(parser, func=process_restore)
 
+
+def parse_list_repo(subparser):
+    parser = cli.add_parser(
+        subparser,
+        'list',
+        help='List the repo',
+        formatter_class=cli.Formatter,
+    )
+    _add_directory_argument(parser, False)
+    cli.set_defaults(parser, func=process_list_repo)
 
 def _parse_args():
     parser = cli.create_parser(__doc__)
@@ -143,6 +190,7 @@ def _parse_args():
     parse_process_register(subparser) 
     parse_process_snapshot(subparser)
     parse_restore_command(subparser)
+    parse_list_repo(subparser)
     return cli.parse_args(parser)
 
 
