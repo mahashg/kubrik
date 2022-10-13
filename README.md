@@ -13,11 +13,13 @@ User can use server to store all the data and ensure that any restoration can be
 
 Workflow consists of 3 steps
 1. Client Registration:
-    Client downloads kubrik-client and runs `kubrik-client register` command. Unlike Polaris, we assume only one server here (to simplify the workflow), register knows which server to connect to, so it connects to server and obtains its uuid. 
+    Client downloads kubrik-client and runs the registration workflow. This workflow registers the client with server and provides users with information on where and how to backup the data.
     
 2. Marking a file to be backing up
-    client can run the command `kubrik-client snapshot <dir>` command. This two things
-    a. makes a call to server to register that snapshot of <dir> needs to be taken. This inturn returns a google_drive_folder id where data should be backedup.
-    b. Once client has obtaind google_drive_folder_id then it can do backup with drive directly without server involvement
+    Client can run snapshot command to mark the directory to be taken backup of. There is a background job which takes snapshot of the directory periodically.
 
-3. Restoration of file
+3. Seeing all the changes
+    Client can run the list command to see all the files under backup and their version, they can also see the file under directory without taking snapshot
+
+4. Taking backup.
+    Client can recover either by path or by hash of the file obtained from list command
