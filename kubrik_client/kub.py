@@ -94,21 +94,32 @@ def find_directory_last_known_snapshot(directory):
     
     for key in _map:        
         if key.endswith(directory):
-            return _map[key][0]
+            return _map[key][-1].get("hash")
     return None
 
 def process_restore(args):
     """
     Server uses email_id, path and returns google_drive_id
     client and use it to navigate and figure out interaction
-    """    
-    snapshot_id = find_directory_last_known_snapshot(args.directory)
-    if not snapshot_id:
-        print("not found")
+    """
+    snapshot_id = None
+    dirname = None
+    if args.directory:
+        snapshot_id = find_directory_last_known_snapshot(args.directory)
+        dirname = os.path.basename(args.directory) + "_" + snapshot_id        
+    if args.hash:
+        snapshot_id = args.hash
+        repo_list = list_repo()
+        for key in repo_list:
+            for value in repo_list[key]:
+                if value['hash'] == args.hash:
+                    dirname = os.path.basename(key) + "_" + snapshot_id
+    
+    if not snapshot_id or not dirname:
+        print("couldn't find any such snapshot")
         return
     
-    kopia.restore(snapshot_id)
-    dirname = os.path.basename(args.directory) + "_" + snapshot_id
+    kopia.restore(snapshot_id)    
     kopia.move(snapshot_id, dirname)
     print("Restored to ", dirname)
 
@@ -158,6 +169,16 @@ def _add_directory_argument(parser, isRequired):
         required=isRequired,
     )
 
+def _add_hash_argument(parser):
+    cli.add_argument(
+        parser,
+        '-hash',
+        '--hash',
+        help='Hash of Snapshot to be Recovered',
+        type=str,
+        required=False,
+    )
+
 
 def parse_process_snapshot(subparser):
     parser = cli.add_parser(
@@ -177,7 +198,8 @@ def parse_restore_command(subparser):
         help='Begin restoring snapshot of a server',
         formatter_class=cli.Formatter,
     )
-    _add_directory_argument(parser, True)
+    _add_directory_argument(parser, False)
+    _add_hash_argument(parser)
     cli.set_defaults(parser, func=process_restore)
 
 
